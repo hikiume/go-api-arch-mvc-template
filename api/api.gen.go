@@ -54,7 +54,7 @@ type AlbumCreateRequest struct {
 type AlbumResponse struct {
 	Anniversary Anniversary `json:"anniversary"`
 	Category    Category    `json:"category"`
-	Id          string      `json:"id"`
+	Id          int         `json:"id"`
 	ReleaseDate ReleaseDate `json:"releaseDate"`
 	Title       string      `json:"title"`
 }
@@ -783,17 +783,17 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"zFRNa9tMEP4rYt73KCw5CTTsLR9NMIW2mPYUcthox/YG7Ud2RynG6L+X3bVqKXbqUFw35GKUmXnm+Zhd",
-	"QWWUNRo1eWAr8NUCFY8/L+qHRl055IRTfGrQU/hqnbHoSGKsqTjh3Lhl+P2/wxkw+K/YTCzW44qrrq7N",
-	"wWGN3OM1J9zXNu2VtjmQpDr20NIiMPDkpJ5DG4c+NdKhAHa3Lss3yw0x7/Ou3zw8YkVhcuQ6RW+N9rhN",
-	"k2stn9F5vp/pRa+0zf9IICl2cDyCblJAvku8Pvs3SDnUav1/qQnn6ELBVU+SocwD4r0OzVVcH3WjwqIz",
-	"Y8KqqvGyghy8NY58b5lX+MUxu1b+6Jxxr7uv0Hs+f4OAXeEujOnQvZlxihMwEOHD9uYhBnpmImZyD25N",
-	"dvF1kn1DZevUFGSWRgOD8agclQHGWNTcSmBwOipHp5CD5bSINAoeQh7pmXTLgSQnafREAIN06vESIPFC",
-	"T5dGRKMqowl17OLW1rKKfcWjD/Dds7H3NrZflHaoIbkG44fkRdz7pBwfdoNfTkdwgb5y0lISMm0ngpRn",
-	"ZXkw3GHCduBecpFtNMnBN0rFC1pvlPFM448sWRgKkpvFSoo2gM9xh6O3SJHw5XIiYhIcV0joPLC7FciA",
-	"G9IB3YWlF2DoRt5j+PIy2/stq8rjWfXl0791KWCfHQ/7s6HsxjRavMjHjdQi5SJ7WGaT67CY5VQttvPw",
-	"3Yruwv9uJN7P03HEPCZ1D/507MV9j6FMWmR8E8x+EuMgj+65y13jamCwILKsKMpR/GPn5XlZcCuL5zG0",
-	"+Yui2lS8XhhPvy8bn3yI08bDsvv2ZwAAAP//",
+	"zFRNa9tMEP4rYt73KCw5CTTsLR9NMIW2mPYUcthox/YG7Ud2RynG6L+X3Y1qKXLqUFI3+GLEzDzzfMxu",
+	"oDLKGo2aPLAN+GqFise/Z/Vdoy4ccsI5PjToKXy1zlh0JDHWVJxwadw6/P/f4QIY/FdsJxZP44qLrq7N",
+	"wWGN3OMlJ9zXNu+VtjmQpDr20NoiMPDkpF5CG4c+NNKhAHbzVJZvlxti3uZdv7m7x4rC5Mh1jt4a7XFM",
+	"k2stH9F5vp/pWa+0zf9IICl6HKUmXKI7iHBSQL5LvT79V2g5FGvM46KnyVDnl5hrruL6qBsVFl0YE1ZV",
+	"jZcV5OCtceR7y7zAL47ZtfJH54x72X6F3vPlKwTsCndhzIfuLYxTnICBCB/Gm4cc6IWJmMk9uDbZ2ddZ",
+	"9g2VrVNTkFkaDQymk3JSBhhjUXMrgcHxpJwcQw6W0yrSKHhIeaRn0jEHkpyk0TMBDNKtx1OAxAs9nRsR",
+	"jaqMJtSxi1tbyyr2Ffc+wHfvxt7jGD8p7VBDcg3GD8mLuPdROX3bDX45HcEF+spJS0nItJ0IUp6U5Zvh",
+	"DhO2A/eci2yrSQ6+USpe0NNGGc80/siShaEguVlspGgD+BJ3OHqNFAmfr2ciJsFxhYTOA7vZgAy4IR3Q",
+	"XVh6AYZu5D2Gzy+zvR1ZVR7Oqi+f/q1LAfvkcNifDWVXptHiWT6upBYpF9ndOptdhsUsp2o1zsN3K7oL",
+	"/7uReD9PxwHzmNR986djL+57DGXSIuPbYPaTGAd5dI9d7hpXA4MVkWVFUU7ij52Wp2XBrSwep9Dmz4pq",
+	"U/F6ZTz9vmx69CFOmw7LbtufAQAA//8=",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,

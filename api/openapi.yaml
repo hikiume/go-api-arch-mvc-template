@@ -117,7 +117,7 @@ components:
       type: object
       properties:
         id:
-          type: string
+          type: integer
         title:
           type: string
         category:
