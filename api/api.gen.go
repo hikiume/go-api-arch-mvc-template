@@ -59,6 +59,12 @@ type AlbumResponse struct {
 	Title       string      `json:"title"`
 }
 
+// AlbumUpdateRequest defines model for AlbumUpdateRequest.
+type AlbumUpdateRequest struct {
+	Category *Category `json:"category,omitempty"`
+	Title    *string   `json:"title,omitempty"`
+}
+
 // Anniversary defines model for Anniversary.
 type Anniversary = int
 
@@ -83,7 +89,7 @@ type ReleaseDate = openapi_types.Date
 type CreateAlbumJSONRequestBody = AlbumCreateRequest
 
 // UpdateAlbumByIdJSONRequestBody defines body for UpdateAlbumById for application/json ContentType.
-type UpdateAlbumByIdJSONRequestBody = AlbumCreateRequest
+type UpdateAlbumByIdJSONRequestBody = AlbumUpdateRequest
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -783,17 +789,17 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"zFRNa9tMEP4rYt73KCw5CTTsLR9NMIW2mPYUcthox/YG7Ud2RynG6L+X3Y1qKXLqUFI3+GLEzDzzfMxu",
-	"oDLKGo2aPLAN+GqFise/Z/Vdoy4ccsI5PjToKXy1zlh0JDHWVJxwadw6/P/f4QIY/FdsJxZP44qLrq7N",
-	"wWGN3OMlJ9zXNu+VtjmQpDr20NoiMPDkpF5CG4c+NNKhAHbzVJZvlxti3uZdv7m7x4rC5Mh1jt4a7XFM",
-	"k2stH9F5vp/pWa+0zf9IICl6HKUmXKI7iHBSQL5LvT79V2g5FGvM46KnyVDnl5hrruL6qBsVFl0YE1ZV",
-	"jZcV5OCtceR7y7zAL47ZtfJH54x72X6F3vPlKwTsCndhzIfuLYxTnICBCB/Gm4cc6IWJmMk9uDbZ2ddZ",
-	"9g2VrVNTkFkaDQymk3JSBhhjUXMrgcHxpJwcQw6W0yrSKHhIeaRn0jEHkpyk0TMBDNKtx1OAxAs9nRsR",
-	"jaqMJtSxi1tbyyr2Ffc+wHfvxt7jGD8p7VBDcg3GD8mLuPdROX3bDX45HcEF+spJS0nItJ0IUp6U5Zvh",
-	"DhO2A/eci2yrSQ6+USpe0NNGGc80/siShaEguVlspGgD+BJ3OHqNFAmfr2ciJsFxhYTOA7vZgAy4IR3Q",
-	"XVh6AYZu5D2Gzy+zvR1ZVR7Oqi+f/q1LAfvkcNifDWVXptHiWT6upBYpF9ndOptdhsUsp2o1zsN3K7oL",
-	"/7uReD9PxwHzmNR986djL+57DGXSIuPbYPaTGAd5dI9d7hpXA4MVkWVFUU7ij52Wp2XBrSwep9Dmz4pq",
-	"U/F6ZTz9vmx69CFOmw7LbtufAQAA//8=",
+	"zFVda9s8FP4r5rzvpYmdtrCiu36sJQy2Ebar0gvVOklUrI9Kxx0h+L8PSc1i12kTRpYN3xhzdJ7zfOh4",
+	"BZVR1mjU5IGtwFcLVDy+XtQPjbpyyAmn+NSgp/DVOmPRkcRYU3HCuXHL8P6/wxkw+K/YdCxe2hVX67o2",
+	"B4c1co/XnHDXsWmntM2BJNXxDC0tAgNPTuo5tLHpUyMdCmB3L2X5Zrg+5n2+Pm8eHrGi0DlynaK3Rnsc",
+	"0uRay2d0nu9metEpbfPfEkiKDkepCefojiKcFJBvU69Lf08tv1tx6Ny8Q2I4Q9+woZZXnQH6o72lvuYq",
+	"oqNuVBBrZkyQSzVeVpCDt8aR7wjyhsaxzTbZPjpn3NsRVOg9n+9h4rpwG8a0n6CZcYoTMAhewXDykEU9",
+	"MxEziQ+3Jrv4Osm+obJ1OhRklkYDg/GoHJUBxljU3EpgcDoqR6eQg+W0iDQKHtIR6ZkUjECSkzR6IoBB",
+	"2jcxQpB4oadLI6JRldGEOp7i1tayiueKRx/g17tr5wUdrrW2ryG5BuOH5EWc+6QcH3aCX05HcIG+ctJS",
+	"EjJNJ4KUZ2V5MNx+wrbgXnKRbTTJwTdKxRv0MlHGM40/smRhKEhuFisp2gA+xy2O3iJFwpfLiYhJcFwh",
+	"ofPA7lYgA25IB6xvWNpCfTfyDsPXN7O9H1hVHs+qL5/+rksB++x42J8NZTem0eJVPm6kFikX2cMym1yH",
+	"wSynajHMQ/ozHCESf2h19P9se62OI+YxTXfw1bET918MZdIi45tgdpMYG3l0z+vcNa4GBgsiy4qiHMWH",
+	"nZfnZcGtLJ7H0OavimpT8XphPL1fNj75ELuN+2X37c8AAAD//w==",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,
