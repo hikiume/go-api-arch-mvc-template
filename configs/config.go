@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	if err :=godotenv.Load(); err != nil {
+	if err := godotenv.Load(); err != nil {
 		logger.Warn("No .env file found, reading from system environment variables")
 	}
 
@@ -50,7 +50,7 @@ func LoadEnv() error {
 		DBPort:              DBPort,
 		DBDriver:            GetEnvDefault("DB_DRIVER", "mysql"),
 		DBUser:              GetEnvDefault("DBUSER", "app"),
-		DBPassword:          GetEnvDefault("DB_PASSWORD",""),
+		DBPassword:          GetEnvDefault("DB_PASSWORD", ""),
 		DBName:              GetEnvDefault("DB_NAME", "api_database"),
 		APICorsAllowOrigins: []string{"http://0.0.0.0:8001"},
 	}
