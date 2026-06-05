@@ -6,6 +6,8 @@ import (
 )
 
 func TestInitEnv(t *testing.T) {
+	t.Setenv("DB_PASSWORD","password")
+
 	err := LoadEnv()
 	assert.Nil(t, err)
 
