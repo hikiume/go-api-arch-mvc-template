@@ -18,6 +18,9 @@ import (
 	"go-api-arch-mvc-template/configs"
 	"go-api-arch-mvc-template/pkg/logger"
 
+	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/timeout"
+	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	middleware "github.com/oapi-codegen/gin-middleware"
 	swaggerfiles "github.com/swaggo/files"
@@ -51,6 +54,7 @@ func main() {
 
 	apiGroup := router.Group("/api")
 	{
+		apiGroup.Use(timeoutMiddleware(2 * time.Second))
 		v1 := apiGroup.Group("/v1")
 		{
 			v1.Use(middleware.OapiRequestValidator(swagger))
@@ -58,6 +62,10 @@ func main() {
 			api.RegisterHandlers(v1, albumHandler)
 		}
 	}
+
+	router.Use(corsMiddleware(configs.Config.APICorsAllowOrigins))
+	router.Use(ginzap.Ginzap(logger.ZapLogger, time.RFC3339, true))
+	router.Use(ginzap.RecoveryWithZap(logger.ZapLogger, true))
 
 	srv := &http.Server{
 		Addr:    "0.0.0.0:8080",
@@ -83,4 +91,23 @@ func main() {
 	}
 	<-ctx.Done()
 	logger.Info("shutdown")
+}
+
+func corsMiddleware(allowOrigins []string) gin.HandlerFunc {
+	config := cors.DefaultConfig()
+	config.AllowOrigins = allowOrigins
+	return cors.New(config)
+}
+
+func timeoutMiddleware(duration time.Duration) gin.HandlerFunc {
+	return timeout.New(
+		timeout.WithTimeout(duration),
+		timeout.WithResponse(func(c *gin.Context) {
+			c.JSON(
+				http.StatusRequestTimeout,
+				api.ErrorResponse{Message: "timeout"},
+			)
+			c.Abort()
+		}),
+	)
 }
