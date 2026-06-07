@@ -169,6 +169,9 @@ type ClientInterface interface {
 
 	CreateAlbum(ctx context.Context, body CreateAlbumJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// DeleteAlbumById request
+	DeleteAlbumById(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetAlbumById request
 	GetAlbumById(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -192,6 +195,18 @@ func (c *Client) CreateAlbumWithBody(ctx context.Context, contentType string, bo
 
 func (c *Client) CreateAlbum(ctx context.Context, body CreateAlbumJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateAlbumRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteAlbumById(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteAlbumByIdRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -274,6 +289,40 @@ func NewCreateAlbumRequestWithBody(server string, contentType string, body io.Re
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteAlbumByIdRequest generates requests for DeleteAlbumById
+func NewDeleteAlbumByIdRequest(server string, id int) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithOptions("simple", false, "id", id, runtime.StyleParamOptions{ParamLocation: runtime.ParamLocationPath, Type: "integer", Format: ""})
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/album/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(http.MethodDelete, queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -407,6 +456,9 @@ type ClientWithResponsesInterface interface {
 
 	CreateAlbumWithResponse(ctx context.Context, body CreateAlbumJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateAlbumResponse, error)
 
+	// DeleteAlbumByIdWithResponse request
+	DeleteAlbumByIdWithResponse(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*DeleteAlbumByIdResponse, error)
+
 	// GetAlbumByIdWithResponse request
 	GetAlbumByIdWithResponse(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*GetAlbumByIdResponse, error)
 
@@ -441,6 +493,37 @@ func (r CreateAlbumResponse) StatusCode() int {
 
 // ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
 func (r CreateAlbumResponse) ContentType() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Header.Get("Content-Type")
+	}
+	return ""
+}
+
+type DeleteAlbumByIdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON400      *ErrorResponse
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteAlbumByIdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteAlbumByIdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// ContentType is a convenience method to retrieve the Content-Type value from the HTTP response headers
+func (r DeleteAlbumByIdResponse) ContentType() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Header.Get("Content-Type")
 	}
@@ -528,6 +611,15 @@ func (c *ClientWithResponses) CreateAlbumWithResponse(ctx context.Context, body 
 	return ParseCreateAlbumResponse(rsp)
 }
 
+// DeleteAlbumByIdWithResponse request returning *DeleteAlbumByIdResponse
+func (c *ClientWithResponses) DeleteAlbumByIdWithResponse(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*DeleteAlbumByIdResponse, error) {
+	rsp, err := c.DeleteAlbumById(ctx, id, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteAlbumByIdResponse(rsp)
+}
+
 // GetAlbumByIdWithResponse request returning *GetAlbumByIdResponse
 func (c *ClientWithResponses) GetAlbumByIdWithResponse(ctx context.Context, id int, reqEditors ...RequestEditorFn) (*GetAlbumByIdResponse, error) {
 	rsp, err := c.GetAlbumById(ctx, id, reqEditors...)
@@ -581,6 +673,39 @@ func ParseCreateAlbumResponse(rsp *http.Response) (*CreateAlbumResponse, error) 
 			return nil, err
 		}
 		response.JSON400 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteAlbumByIdResponse parses an HTTP response from a DeleteAlbumByIdWithResponse call
+func ParseDeleteAlbumByIdResponse(rsp *http.Response) (*DeleteAlbumByIdResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteAlbumByIdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	}
 
@@ -672,6 +797,9 @@ type ServerInterface interface {
 	// Create a new album
 	// (POST /album)
 	CreateAlbum(c *gin.Context)
+	// Delete a album by ID
+	// (DELETE /album/{id})
+	DeleteAlbumById(c *gin.Context, id int)
 	// Find album by ID
 	// (GET /album/{id})
 	GetAlbumById(c *gin.Context, id int)
@@ -700,6 +828,31 @@ func (siw *ServerInterfaceWrapper) CreateAlbum(c *gin.Context) {
 	}
 
 	siw.Handler.CreateAlbum(c)
+}
+
+// DeleteAlbumById operation middleware
+func (siw *ServerInterfaceWrapper) DeleteAlbumById(c *gin.Context) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "id" -------------
+	var id int
+
+	err = runtime.BindStyledParameterWithOptions("simple", "id", c.Param("id"), &id, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "integer", Format: ""})
+	if err != nil {
+		siw.ErrorHandler(c, fmt.Errorf("Invalid format for parameter id: %w", err), http.StatusBadRequest)
+		return
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		middleware(c)
+		if c.IsAborted() {
+			return
+		}
+	}
+
+	siw.Handler.DeleteAlbumById(c, id)
 }
 
 // GetAlbumById operation middleware
@@ -780,6 +933,7 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 	}
 
 	router.POST(options.BaseURL+"/album", wrapper.CreateAlbum)
+	router.DELETE(options.BaseURL+"/album/:id", wrapper.DeleteAlbumById)
 	router.GET(options.BaseURL+"/album/:id", wrapper.GetAlbumById)
 	router.PATCH(options.BaseURL+"/album/:id", wrapper.UpdateAlbumById)
 }
@@ -789,17 +943,18 @@ func RegisterHandlersWithOptions(router gin.IRouter, si ServerInterface, options
 // const string: with thousands of chunks the chained `+` fold is several
 // times slower for the Go compiler than parsing a slice literal.
 var swaggerSpec = []string{
-	"zFVda9s8FP4r5rzvpYmdtrCiu36sJQy2Ebar0gvVOklUrI9Kxx0h+L8PSc1i12kTRpYN3xhzdJ7zfOh4",
-	"BZVR1mjU5IGtwFcLVDy+XtQPjbpyyAmn+NSgp/DVOmPRkcRYU3HCuXHL8P6/wxkw+K/YdCxe2hVX67o2",
-	"B4c1co/XnHDXsWmntM2BJNXxDC0tAgNPTuo5tLHpUyMdCmB3L2X5Zrg+5n2+Pm8eHrGi0DlynaK3Rnsc",
-	"0uRay2d0nu9metEpbfPfEkiKDkepCefojiKcFJBvU69Lf08tv1tx6Ny8Q2I4Q9+woZZXnQH6o72lvuYq",
-	"oqNuVBBrZkyQSzVeVpCDt8aR7wjyhsaxzTbZPjpn3NsRVOg9n+9h4rpwG8a0n6CZcYoTMAhewXDykEU9",
-	"MxEziQ+3Jrv4Osm+obJ1OhRklkYDg/GoHJUBxljU3EpgcDoqR6eQg+W0iDQKHtIR6ZkUjECSkzR6IoBB",
-	"2jcxQpB4oadLI6JRldGEOp7i1tayiueKRx/g17tr5wUdrrW2ryG5BuOH5EWc+6QcH3aCX05HcIG+ctJS",
-	"EjJNJ4KUZ2V5MNx+wrbgXnKRbTTJwTdKxRv0MlHGM40/smRhKEhuFisp2gA+xy2O3iJFwpfLiYhJcFwh",
-	"ofPA7lYgA25IB6xvWNpCfTfyDsPXN7O9H1hVHs+qL5/+rksB++x42J8NZTem0eJVPm6kFikX2cMym1yH",
-	"wSynajHMQ/ozHCESf2h19P9se62OI+YxTXfw1bET918MZdIi45tgdpMYG3l0z+vcNa4GBgsiy4qiHMWH",
-	"nZfnZcGtLJ7H0OavimpT8XphPL1fNj75ELuN+2X37c8AAAD//w==",
+	"7FZda9s8FP4r5rzvpYmdtrCiuzZdSxh0I2xXpReqdZKo2JIqHXeE4P8+JCWrHadNGZm3i5EbI47Oc54P",
+	"SVlDoSujFSpywNbgiiVWPHxelA91NbHICWf4VKMjv2qsNmhJYqgpOOFC25X//t/iHBj8l710zDbtssm2",
+	"rknBYonc4RUnPLRt1iptUiBJZdhDK4PAwJGVagFNaPpUS4sC2N2mLH0Zrot5n27364dHLMh3Dlxn6IxW",
+	"Dvs0uVLyGa3jh5letEqb9JcEkqLFUSrCBdpBhJMC0n3qtem/U8tvRhw7N2+Q6M/QNayv5aQ1QHe019RX",
+	"vAroqOrKizXX2stV1U4WkIIz2pJrCfKKxqHNPtk+Wqvt6xGs0Dm+eIeJ28J9GLNugubaVpyAgfcK+pP7",
+	"LKq5DphRfLjRycWXafIVK1PGTV5mqRUwGI/yUe5htEHFjQQGp6N8dAopGE7LQCPjPh2Bno7B8CQ5Sa2m",
+	"AhjE+yZECCIvdHSpRTCq0IpQhV3cmFIWYV/26Dz89u46eED711rT1ZBsjWEhehHmPsnHx53gp9MBXKAr",
+	"rDQUhYzTCS/lWZ4fDbebsD24l1wkL5qk4OqqCidoM1HCE4Xfk2ihL4huZmspGg8usMSYrK6pV2E90L5c",
+	"TUXIg+UVEloH7G4N0qP7jMD2nMW7qOtJ2uK5ez6b+55hZ3GkNsFbnUw2Sv5RbT322XDYt5qSa10rseNq",
+	"9CXh0dHkYZVMr/xwC9xzMm+QhnYwH+7Iff70LxHA4FoqsZsGw6lY9vMQX/gBIvGbnoDuP5R3PQED5jFO",
+	"d/Qn4CDu3xjKqEX7mmonMTRyaJ+3uattCQyWRIZlWT4KP3aen+cZNzJ7HkOT7hSVuuDlUjt6u2x88iF0",
+	"G3fL7psfAQAA//8=",
 }
 
 // decodeSpec returns the embedded OpenAPI spec as raw JSON bytes,
